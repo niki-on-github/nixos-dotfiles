@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Description: Start application in VPN network namespace
+# Dependencies: vopono (AUR)
+
+profile_list=$(grep "^Name=" $HOME/.mozilla/firefox/profiles.ini | cut -c 6- | sort | uniq | grep -v "^default$")
+if echo "$profile_list" | grep -q "vpn"; then
+    cmd="firefox -no-remote -P vpn"
+else
+    notify-send "Warning" "No VPN profile found!"
+    cmd="firefox -no-remote -P"
+fi
+
+exec $HOME/.local/bin/vpn/vpn-exec bg $cmd

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Description: function to remove a git submodule
+
+usage() {
+    cat <<EOF
+`basename $0` is a script to remove a git submodule.
+
+Usage: `basename $0` [GIT_SUBMODULE_PATH]
+
+The script must be called in the root directory of the git repository which
+contains the .git directory and the .gitmodules file.
+EOF
+    exit $1
+}
+
+error() {
+    echo -e "\033[0;31mERROR:\033[0m $1\n"
+    usage 1
+}
+
+[ "$1" = "-h" ] && usage 0
+[ "$1" = "-help" ] && usage 0
+[ ! -d .git ] && error "not in the git repository root directory"
+[ ! -f .gitmodules ] && error ".gitmodules do not exist"
+submodulPath="$@"
+grep -q "/$" <<< "$submodulPath" && submodulPath=${submodulPath::-1}
+[ -z "$submodulPath" ] && error "submodul path not exist"
+[ ! -d "$submodulPath" ] && error "submodul path not exist"
+grep -q "path = $submodulPath" .gitmodules || exit
+git submodule deinit -f "$submodulPath"
+rm -rf ".git/modules/${submodulPath}"
+git rm -f "$submodulPath"
+echo -e ">> The submodule was successfully removed.\nNote: the changes still have to be committed."

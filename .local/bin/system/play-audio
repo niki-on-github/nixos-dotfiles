@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Description: play local audio file with mpd
+# TODO: if music is inside the library and was added after an database update this do method fails
+
+usage() {
+[ -z "${1}" ] || echo -e "\033[0;31mERROR: ${1}\033[0m\n"
+echo "\
+script to play local audio files with mpd
+
+Usage:
+  ~\$ $(basename "$0") \"[FILE]\""
+[ -z "${1}" ] && exit 2 || exit 0
+}
+
+# error messages
+WRONG_ARGS_ERR='wrong number of arguments passed to script'
+
+[ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
+[ "$1" = "-h" ] && usage
+
+# get audio file absolute path
+link=$(readlink -f "$@")
+
+_mpc="mpc --host=$XDG_RUNTIME_DIR/mpd/socket"
+
+play () {
+    if [ -z "$(eval "$_mpc current")" ]; then # nothing playing
+        if [ -z "$(mpc playlist)" ]; then # playlist empty
+            eval "$_mpc update"
+            eval "$_mpc add \"file://${link}\""
+            eval "$_mpc play"
+        else # playlist not empty so clear add file and play
+            eval "$_mpc clear"
+            eval "$_mpc update"
+	        eval "$_mpc add \"file://${link}\""
+            eval "$_mpc play"
+	    fi
+    else # audio playing insert file and play it
+        eval "$_mpc update"
+        eval "$_mpc insert \"file://${link}\""
+	    eval "$_mpc next"
+    fi
+}
+
+play

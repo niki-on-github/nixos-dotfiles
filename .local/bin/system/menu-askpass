@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+
+# Set this script in the SUDO_ASKPASS environment variable to redirect sudo passwords form 'sudo -A' to this dmenu password promt.
+# NOTE: This script required dmenu with password promt patch (-P)
+
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+    if echo "$(tty)" | grep -q "^tty" ; then
+        echo -n "$1: " >&2
+        read -s pw
+    elif [ -t 0 ]; then
+        echo -n "$1: " >&2
+        read -s pw
+    else
+        pw=$(eval "tofi </dev/null --include $HOME/.config/tofi/overlay-password --prompt-text \"$1 \"")
+    fi
+fi
+
+if [ -z "$pw" ]; then
+    echo "$1:" >&2
+    read -s pw
+fi
+
+if [ -z "$pw" ]; then
+    echo "no password was entered" >&2
+    exit 1
+else
+    echo "$pw"
+    echo "" >&2
+fi

@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+
+[ -z "$TERMINAL" ] && notify-send "Error" "Environment variable \$TERMINAL is not set" && exit 1
+[ -z "$EDITOR" ] && notify-send "Error" "Environment variable \$EDITOR is not set" && exit 1
+[ ! -d $HOME/.dotfiles ] && notify-send "Error" "Dotfiles are not stored in a git bare repository" && exit 1
+
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+    choice=$(git --git-dir=$HOME/.dotfiles --work-tree=$HOME ls-files --full-name | \
+        sort | eval "tofi --include $HOME/.config/tofi/overlay-vertical --prompt-text \"Edit Config > \"") || exit
+fi
+
+[ -n "$choice" ] || exit
+choice="$HOME/$choice"
+[ -e $choice ] || exit
+case $(file --mime-type $choice -b) in
+    image/*) setsid imv $choice >/dev/null 2>&1 & ;;
+    # NOTE: In some Terminals nvim does not resize if called direct, workaround add sleep
+    text/*|*) $TERMINAL -e sh -c "sleep 0.1; $EDITOR $choice;" ;;
+esac
+

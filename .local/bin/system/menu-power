@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+# Description: Menu for lock, logout, shutdown and reboot
+
+
+menu=('  cancel ' '  lockout ' '  shutdown ' '  reboot ')
+
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+    choice=$(printf '%s\n' "${menu[@]}" | eval "tofi --include $HOME/.config/tofi/overlay-horizontal --prompt-text \"Power Menu >\"") || exit
+fi
+
+function confirm {
+    if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+        printf ' cancel\n yes' |  eval "tofi --include $HOME/.config/tofi/overlay-horizontal --prompt-text \"$1 >\""
+    fi
+}
+
+case "$choice" in
+    '  lock ')     eval "$LOCK" ;;
+    '  lockout ')  if [ "$(confirm "logout?")" == " yes" ]; then
+                        session=$(loginctl session-status | head -n 1 | cut -d' ' -f1)
+                        [ -n "$session" ] && loginctl terminate-session $session
+                    fi ;;
+    '  shutdown ') if [ "$(confirm "shutdown?")" == " yes" ]; then
+                        msg="$(poweroff 2>&1)"
+                        [ "$?" != "0" ] && notify-send "ERROR" "$msg"
+                    fi ;;
+    '  reboot ')   if [ "$(confirm "reboot?")" == " yes" ]; then
+                        msg="$(reboot 2>&1)"
+                        [ "$?" != "0" ] && notify-send "ERROR" "$msg"
+                    fi ;;
+esac >/dev/null
+

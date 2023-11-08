@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+usage() {
+    cat <<EOF
+`basename $0` is a script to create a git tag on local + remote (overrides existing tag).
+
+Usage: `basename $0` [TAG_NAME]
+
+EOF
+    exit $1
+}
+
+error() {
+    echo -e "\033[0;31mERROR:\033[0m $1\n"
+    usage 1
+}
+
+[ "$1" = "-h" ] && usage 0
+[ "$1" = "-help" ] && usage 0
+gitTag="$@"
+if git tag | grep -q "$gitTag"; then
+    git tag -d $gitTag
+    git push --delete origin $gitTag
+fi
+git tag $gitTag
+git push --tag

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+if command -v firefox ; then
+    _firefox=firefox
+elif command -v firefox-bin ; then
+    _firefox=firefox-bin
+else
+    echo "firefox is not installed!"
+    notify-send "ERROR" "Firefox is not installed"
+    exit 1
+fi
+
+if [ ! -f $HOME/.mozilla/firefox/profiles.ini ]; then
+    echo "[ERROR] FileNotFound: $HOME/.mozilla/firefox/profiles.ini"
+    notify-send "FileNotFound" "$HOME/.mozilla/firefox/profiles.ini"
+    exit 1
+fi
+
+function selection_menu {
+    if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+        eval "tofi --include $HOME/.config/tofi/overlay-horizontal --prompt-text \"$1 >\""
+    fi
+}
+
+choice=$(grep "^Name=" $HOME/.mozilla/firefox/profiles.ini | cut -c 6- | sort | uniq | selection_menu "Firefox Profile") || exit
+[ -z "$choice" ] && exit
+! grep "^Name=$choice" $HOME/.mozilla/firefox/profiles.ini >/dev/null && notify-send "Firefox" "Profile $choice not found!" && exit 1
+
+if echo "$choice" | grep -q -i "vpn" ; then
+    bash $HOME/.local/bin/vpn/vpn-firefox
+else
+    setsid $_firefox -new-instance -P "$choice" >/dev/null 2>&1 & disown
+fi

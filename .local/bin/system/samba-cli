@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+MOUNT_PATH="/home/$USER/samba/"
+
+usage() {
+    cat <<EOF
+'`basename $0`' is a script to mount samba shares in '$MOUNT_PATH'
+
+Usage: `basename $0` mount|--mount|-m
+       `basename $0` umount|--umount|-u
+       `basename $0` help|--help|-h
+
+The following specific options are supported:
+
+  -m, --mount       Mount an samba share in '$MOUNT_PATH'
+  -u, --umount      Unmount an samba share from '$MOUNT_PATH'
+  -h, --help        Display this help
+
+EOF
+    exit $1
+}
+
+
+smb_mount() {
+    read -p 'samba path: (syntax: //<ip>/<path>): ' samba_path
+    read -p 'samba user: ' samba_user
+    read -sp 'samba password: ' samba_password
+    echo ""
+
+    mount_postfix=${samba_path//\/\//}
+    mount_postfix=${mount_postfix//\//_}
+    mount_postfix=${mount_postfix//./-}
+    mount_path="${MOUNT_PATH}smb_${mount_postfix}"
+    mkdir -p $mount_path
+
+    echo -e "[INFO] Mount $samba_path -> $mount_path"
+    sudo mount -t cifs -o uid=$(id -u),gid=$(id -g),user="$samba_user",password="$samba_password" "$samba_path" "$mount_path"
+    if [ $? -eq 0 ]; then
+        echo -e "[INFO] Mount $samba_path -> $mount_path ... OK"
+    else
+        echo -e "[ERROR] Samba mount FAILED"
+        exit 1
+    fi
+}
+
+smb_umount() {
+    if [ $(ls -A $MOUNT_PATH | wc -l) -eq 0 ]; then
+        echo "[INFO] No samba shares mounted in '$MOUNT_PATH'"
+        exit 0
+    fi
+    choice=$(ls -A $MOUNT_PATH | fzf) || exit 0
+    [ -n "$choice" ] || exit 0
+    mount_path="${MOUNT_PATH}${choice}"
+    [ -d $mount_path ] || exit 1
+    echo -e "[INFO] unmount $mount_path"
+    sudo umount $mount_path
+    if [ $? -eq 0 ]; then
+        echo -e "[INFO] unmount $mount_path ... OK"
+        rm -fd $mount_path
+    else
+        echo -e "[ERROR] Samba unmount FAILED"
+        exit 1
+    fi
+}
+
+if [ "$EUID" = 0 ]; then
+    echo "[ERROR] script can not run with sudo!!"
+    exit 1
+fi
+
+case "$1" in
+    umount|--umount|-u) smb_umount ;;
+    mount|--mount|-m)   smb_mount ;;
+    help|--help|-h)     usage 0 ;;
+    *)                  usage 1 ;;
+esac

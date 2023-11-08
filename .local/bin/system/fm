@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [ "$TERM" = "alacritty" ]; then
+    tmux -f $HOME/.config/tmux/tmux.conf new-session lf
+else
+    alacritty -e tmux -f $HOME/.config/tmux/tmux.conf new-session lf
+fi

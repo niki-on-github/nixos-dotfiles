@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Description: Concatenating videos with different codecs
+
+mapfile -t selection < <(find . -maxdepth 1 -type f | sort -r | fzf -e --multi --bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all | sort)
+[ "${#selection[@]}" -le "1" ] && echo "[ERROR] Not enough video files were selected" && exit 1
+
+index=$((0))
+input=""; filter=""
+while [ "$index" -lt "${#selection[@]}" ] ; do
+    input="$input -i \"${selection[$index]}\""
+    filter="$filter[$index:v:0][$index:a:0]"
+    index=$(($index+1))
+done
+filter="${filter}concat=n=${index}:v=1:a=1[outv][outa]"
+
+saveAs="${selection[0]%.*}" # first filename without file extension
+n=$((0))
+while [ -f "${saveAs}-concat-${n}.mp4" ]; do
+   n=$((n+1))
+done
+saveAs="${saveAs}-concat-${n}.mp4"
+
+echo "run: ffmpeg$input -filter_complex \"$filter\" -map \"[outv]\" -map \"[outa]\" -c:v libx265 -crf 15 \"$saveAs\""
+eval "ffmpeg$input -filter_complex \"$filter\" -map \"[outv]\" -map \"[outa]\" -c:v libx265 -crf 15 \"$saveAs\""
+

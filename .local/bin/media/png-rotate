@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+if [ "$#" -ne 2 ]; then
+    echo "usage `basename $0` [IMG_FOLDER] [ROTATION]"
+    exit 1
+fi
+
+target=$1
+deg=$2
+
+if [ -d $target ]; then
+    result=$(mktemp -d)
+    parallel -n 1 convert {} -rotate $deg $result/{/} ::: $target/*.png
+    mv $result $target/rotated
+else
+      convert "$target" -rotate $deg "${target}-rotated.png"
+fi
+
+
