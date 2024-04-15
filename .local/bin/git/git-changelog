@@ -1,0 +1,25 @@
+#/usr/bin/env bash
+
+if [ "$1" == "--all" ]; then
+	current_tag="HEAD"
+	for prev_tag in $(git tag --list --sort=-v:refname) ; do
+		echo -e "\n\n# $current_tag"
+		git --no-pager log --pretty=format:'- %s' ${prev_tag}..${current_tag}
+		current_tag="$prev_tag"
+	done
+	exit
+fi
+
+# number > 0
+if [[ $1 =~ ^[1-9][0-9]*$ ]]; then
+	idx=$(($1))
+	tag1=$(git tag --list --sort=-v:refname | head -n $((idx+1)) | tail -n 1)
+	tag2=$(git tag --list --sort=-v:refname | head -n $((idx)) | tail -n 1)
+	echo "# $tag2"
+	git log --pretty=format:'- %s' $tag1..$tag2
+	exit
+fi
+
+tag=$(git tag --list --sort=-v:refname | head -n 1)
+echo "# latest .. $tag"
+git log --pretty=format:'- %s' $tag..HEAD
