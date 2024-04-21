@@ -101,6 +101,9 @@ while read i; do if [ "$i" = "$(basename $tmpSelectionFile)" ]; then break; fi; 
 
 mapfile -t files < $tmpSelectionFile
 
+if [ $(($(stat -f --format="%a*%S" .))) -lt 100000000000 ]; then
+    notify-send --urgency critical "Warning" "Local storage is almost full!!"
+fi
 
 if (( ${#files[@]} )); then
     print 'rsync downloading ...'

@@ -148,4 +148,4 @@ export_systemd_vars
 zsh-plugins
 
 trap - INT
-clear
+# clear

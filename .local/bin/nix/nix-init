@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+choice=$(echo 'python
+rust' | sort | fzf --prompt "language > ")
+
+[ -n "$choice" ] || exit 0
+
+
+function init_python() {
+  nix flake init --template github:nix-community/poetry2nix
+  sed -i 's/projectDir = self; }/projectDir = self; preferWheels = true; }/g' flake.nix
+  cat <<EOT >> TEMPLATE.md
+# Usage
+
+- \`poetry add [DEPENDENCY]\`
+EOT
+  cat TEMPLATE.md
+  touch README.md
+}
+
+
+function init_rust() {
+  git init
+  nix flake init --template "templates#rust" | grep -v "direnv"
+  if command -v direnv >/dev/null ; then  
+    direnv allow
+  fi
+}
+
+case $choice in
+  python) init_python ;;
+  rust) rust_init ;;
+  *) echo "ERROR: Not Template available for $choice" && exit 1 ;;
+esac

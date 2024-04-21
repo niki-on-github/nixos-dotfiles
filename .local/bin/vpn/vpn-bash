@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# Description: Start bash in VPN network namespace
-# Dependencies: vopono (AUR)
-
-exec $HOME/.local/bin/vpn/vpn-exec fg bash

@@ -19,13 +19,22 @@ EOF
     exit $1
 }
 
-
+HOMESERVER_IP="10.0.1.2"
+HOMESERVER_DOMAIN="k8s.lan"
 OPENVPN_CONFIG_DIR="$HOME/Sync/VPN/AirVPN"
-LOCKED_OPENVPN_CONFIGS=$(lslocks -n -o PATH 2>/dev/null | grep "^$OPNECT_CONFIG_DIR")
-OPENVPN_CONFIG=$(find $OPENVPN_CONFIG_DIR -iname "*.ovpn" | grep -v "$LOCKED_OPENVPN_CONFIGS" | sort -R | tail -1)
+LOCKED_OPENVPN_CONFIGS=$(lslocks -n -o PATH 2>/dev/null | grep "^$OPENVPN_CONFIG_DIR")
 INTERFACE=$(ip route | awk '/default/ { print $5 }')
+BYPASS_HOSTS="\"${HOMESERVER_IP} jdownloader.${HOMESERVER_DOMAIN}\",\"${HOMESERVER_IP} vaultwarden.${HOMESERVER_DOMAIN}\",\"${HOMESERVER_IP} webdav.${HOMESERVER_DOMAIN}\",\"${HOMESERVER_IP} git.${HOMESERVER_DOMAIN}\",\"${HOMESERVER_IP} nzbget.${HOMESERVER_DOMAIN}\",\"${HOMESERVER_IP} auth.${HOMESERVER_DOMAIN}\",\"${HOMESERVER_IP} qbittorrent.${HOMESERVER_DOMAIN}\""
+
+if [ -z "$LOCKED_OPENCPN_CONFIGS" ]; then
+    OPENVPN_CONFIG=$(find $OPENVPN_CONFIG_DIR -iname "*.ovpn" | sort -R | tail -1)
+else
+    OPENVPN_CONFIG=$(find $OPENVPN_CONFIG_DIR -iname "*.ovpn" | grep -v "$LOCKED_OPENVPN_CONFIGS" | sort -R | tail -1)
+fi
 
 [ -z "$SUDO_ASKPASS" ] && notify-send "Warning" "Environment variable \$SUDO_ASKPASS is not set!"
+
+echo "select $OPENVPN_CONFIG"
 
 mode="$1"
 
@@ -54,8 +63,8 @@ if [ "$mode" = "fg" ]; then
             --interface $INTERFACE \
             --custom $OPENVPN_CONFIG \
             --protocol openvpn \
-            --hosts \"10.0.1.10 jdownloader.server01.lan\",\"10.0.1.10 vaultwarden.server01.lan\",\"10.0.1.10 webdav.server01.lan\",\"10.0.1.10 nzbget.server01.lan\",\"10.0.1.10 auth.server01.lan\" \
-            --open-hosts 10.0.1.10  \
+            --hosts ${BYPASS_HOSTS} \
+            --open-hosts ${HOMESERVER_IP}  \
             \"$cmd\""
 else
     logfile=$(mktemp)
@@ -68,8 +77,8 @@ else
             --interface $INTERFACE \
             --custom $OPENVPN_CONFIG \
             --protocol openvpn \
-            --hosts \"10.0.1.10 jdownloader.server01.lan\",\"10.0.1.10 vaultwarden.server01.lan\",\"10.0.1.10 webdav.server01.lan\",\"10.0.1.10 nzbget.server01.lan\",\"10.0.1.10 auth.server01.lan\" \
-            --open-hosts 10.0.1.10  \
+            --hosts ${BYPASS_HOSTS} \
+            --open-hosts ${HOMESERVER_IP}  \
             \"$cmd\" \
         >$logfile 2>&1" \
         & disown

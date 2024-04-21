@@ -28,6 +28,6 @@ surfixed=$(echo "$@" | grep -Eo ":.+$")
 if grep "Host ${usr}.${host}" ~/.ssh/config >/dev/null ; then
     eval "git clone ${prefixed}${usr}.${host}${surfixed}"
 else
-    exho "\"Host ${usr}.${host}\" not in ~/.ssh/config!"
+    echo "\"Host ${usr}.${host}\" not in ~/.ssh/config!"
     eval "git clone $@"
 fi

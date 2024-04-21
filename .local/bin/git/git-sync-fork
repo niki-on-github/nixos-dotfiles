@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+URL=$1
+
+usage() {
+  echo "Usage:"
+  echo "`basename $0` URL"
+  exit 1
+}
+
+if [ -z "$URL" ]; then
+  usage
+fi
+
+origin="$(git remote get-url origin)"
+git remote set-url origin $URL
+git pull --all
+git branch -r | grep -v '\->' | sed 's@origin/@@' | xargs -I{} git checkout -b {}
+git remote set-url origin $origin
+git push --all origin
+git push --tags origin

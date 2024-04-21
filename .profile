@@ -1,5 +1,6 @@
 export BROWSER="firefox"
 export EDITOR="hx"
+export READER="zathura"
 export TERMINAL="alacritty"
 export GDK_DPI_SCALE=1.4
 export QT_SCALE_FACTOR=1.4

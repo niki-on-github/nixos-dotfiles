@@ -50,6 +50,7 @@ alias k="kubectl"
 alias t="terraform"
 alias check-yaml="ruby -ryaml -e 'p YAML.load(STDIN.read)' >/dev/null <"
 alias yay="paru"
+alias s="nix develop -c \$SHELL"
 
 # ls with icons
 if command -v lsd >/dev/null ; then
@@ -78,7 +79,7 @@ alias g="git" gs="git status" gb="git branch" gcmsg="git commit -m" gcm="git com
     gls="git ls-tree -r --name-only HEAD | sort" gm="git merge" greset="git reset --hard HEAD && git clean -f -d" \
     git-edit-last-commit-msg="git commit --amend" gcmsgfix="git commit --amend" git-get-submodules="git submodule update --init --recursive --remote"
 
-alias add="git add -v" branch="git branch" checkout='git checkout' clone="git clone --recursive --recurse-submodules" commit="git commit -m" config='git config -l | sort' init="git init" pull="git pull && git submodule update" push="git push && git lfs push origin \$(git branch | grep '^* ' | cut -c 3-) --all" status="git status -v"
+alias add="git add -v" branch="git branch" checkout='git checkout' clone="git clone --recursive --recurse-submodules" commit="git commit -m" config='git config -l | sort' init="git init" pull="git pull && git submodule update" push="git push; [ \$(git lfs ls-files | wc -l) -eq 0 ] || git lfs push origin" status="git status -v"
 
 # btrfs
 alias btrfs="sudo btrfs"

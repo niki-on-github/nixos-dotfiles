@@ -283,7 +283,7 @@ cmd extract ${{
         *.tar.xz|*.txz) extractTAR "xJvf" ;;
         *.zip) extractZIP ;;
         *.rar) extractRAR ;;
-        *.7z) extract7z ;;
+        *.7z|*.7z.*) extract7z ;;
         *.bz2) bunzip2 $f ;;
         *.xz) xz --decompress $f ;;
         *) lf -remote "send $id echo \"ERROR: archive type not implemented!\"" ;;
@@ -812,3 +812,4 @@ map R :bulk-rename
 map , :cd-terminal
 map <backspace> set hidden!
 map z z
+map ge :bottom

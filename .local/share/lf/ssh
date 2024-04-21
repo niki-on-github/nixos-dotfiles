@@ -1,0 +1,6 @@
+nix@server02.lan:/opt/k3s/data/persistent/v/media-network-share-data/Filme
+nix@server02.lan:/opt/k3s/data/persistent/v/media-network-share-data/Serien
+nix@server02.lan:/opt/k3s/data/persistent/v/media-network-share-data/Musik
+nix@server02.lan:/opt/k3s/data/persistent/v/media-network-share-data/pv/jdownloader-downloads
+nix@server02.lan:/opt/k3s/data/persistent/v/media-network-share-data/pv/nzbget-downloads/completed
+nix@server02.lan:/opt/k3s/data/persistent/v/media-network-share-data/pv/qbittorrent-downloads

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [ ! -f "$HOME/.env" ]; then
+  echo "$HOME/.env not found!"
+  exit 1
+fi
+
+source $HOME/.env
+
+echo "FTP Host: $FTP_HOST"
+
+if [ $(($(stat -f --format="%a*%S" .))) -lt 100000000000 ]; then
+    echo "Warning: Local storage is almost full!!"
+    notify-send --urgency critical "Warning" "Local storage is almost full!!"
+fi
+
+lftp -c "open $FTP_HOST -u $FTP_USER,$FTP_PASSWORD && find -l && exit" \
+  | awk '{ s = ""; for (i = 6; i <= NF; i++) s = s $i " "; print s }' \
+  | sed 's/.$//' \
+  | fzf -e --multi --bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all \
+  | cut -c 3- \
+  | parallel --rpl '{} uq()' -j 2 "echo \"download {} -> .\"; wget -nH -m -P tmp.ftp-{#} \"ftp://$FTP_USER:$FTP_PASSWORD@$FTP_HOST/{}\" 2>&1 | grep -i \"failed\|error\"; mv \"tmp.ftp-{#}/{}\" .; rm -rf tmp.ftp-{#}"
+
+echo "done"

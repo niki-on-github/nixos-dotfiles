@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+sudo ip netns list | while IFS= read -r line; do
+    if [[ $line == vo_* ]]; then
+		    ns="$(echo "$line" | cut -d' ' -f1)"
+		    echo "delete ns=$ns"
+		    sudo ip netns delete $ns
+	fi
+done
+
+sudo ip link show | awk -F': ' '{print $2}' | while IFS= read -r line; do
+    if [[ $line == vo_* ]]; then
+        link="$(echo $line | cut -d'@' -f1)"
+		    echo "delete link=$link"
+		    sudo ip link delete $link
+	fi
+done
+
+echo "vpn namespace reset completed"

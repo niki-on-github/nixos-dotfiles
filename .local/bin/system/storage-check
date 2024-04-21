@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+lsblk -P -p -o "FSUSE%,MOUNTPOINT" | grep -v "MOUNTPOINT=\"\"" | grep -v "FSUSE%=\"\"" | while read -r fuse mountpoint ; do
+    if [ "${fuse:8:-2}" -ge "95" ]; then
+        echo "Warning Storage \"${mountpoint:12:-1}\" almost full (${fuse:8:-1})"
+        if [ "$EUID" -ne 0 ]; then
+            notify-send "Filesystem Monitoring" "Storage \"${mountpoint:12:-1}\" almost full (${fuse:8:-1})"
+        fi
+    fi
+done
+
+# this requires sudo
+if [ "$EUID" -eq 0 ]; then
+    lsblk -P -p -o "FSTYPE,NAME" | grep "FSTYPE=\"btrfs\"" | grep -Eo "NAME=\"[^\"]*" | cut -d \" -f 2 | while read -r device ;
+    do
+        #NOTE: this only prints errors
+        sudo btrfs device stat $device | grep -v ' 0$' | while read -r errs ;
+        do
+            echo "BTRFS Error $errs"
+            notify-send "BTRFS Error" "$errs"
+        done
+    done
+else
+    echo "Run as root to perform extended check"
+fi
+
+exit 0

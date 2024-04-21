@@ -12,4 +12,4 @@ HISTSIZE=2500
 SAVEHIST=2500
 
 HISTFILE=~/.cache/zhistory
-HISTORY_IGNORE='(rm *|cd|cd ..|l|la|ga|gaa|gp|z|gcm|gcm *|gcmsg|gcmsg *)'
+HISTORY_IGNORE='(rm *|cd|cd ..|l|la|ga|gaa|gp|z|gcm|gcm *|gcmsg|gcmsg *|gcmsgfix|gcmsgfix *)'

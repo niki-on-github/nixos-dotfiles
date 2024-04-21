@@ -1,3 +1,4 @@
 [binds]
 n = next 1
 p = prev 1
+<Ctrl+d> = exec notify-send "delete" "$imv_current_file" && trash-put "$imv_current_file"; close

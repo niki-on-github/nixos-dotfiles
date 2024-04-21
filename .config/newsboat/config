@@ -44,7 +44,7 @@ macro w set browser "w3m" ; open-in-browser
 macro c set browser "xsel -b <<<" ; open-in-browser
 
 urls-source "freshrss"
-freshrss-url "https://freshrss.server01.lan/api/greader.php"
+freshrss-url "https://rss.k8s.lan/api/greader.php"
 freshrss-login "admin"
 freshrss-password "mypassword"
 freshrss-min-items 50
