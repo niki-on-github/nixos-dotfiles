@@ -689,6 +689,26 @@ cmd on-cd ${{
     _ZO_DATA_DIR=$HOME/.local/share/zinit/polaris/share zoxide add "$PWD"    
 }}
 
+cmd edit ${{
+    if [ -n "$EDITOR" ]; then
+        $EDITOR $f
+    else
+        notify-send "ERROR" "\$EDITOR is not defined" 
+    fi
+}}
+
+cmd vim ${{
+    if command -v neovim >/dev/null; then
+        neovim $f
+    elif command -v vim >/dev/null; then
+        vim $f
+    elif [ -n "$EDITOR" ]; then
+        $EDITOR $f
+    else
+        notify-send "ERROR" "vim is not installed" 
+    fi
+}}
+
 #################################################################
 # Key Bindings
 #################################################################
@@ -743,8 +763,12 @@ map "'"     # mark-load
 map p       # paste (we use rpaste)
 map t       # tag
 map z       # display
+map e       # editor
+map v       # invert
 
 # Add custom functions (space at the end sometimes break bindings!)
+map e :edit
+map v :vim
 map <right> :open
 map l :open
 map <enter> :open
